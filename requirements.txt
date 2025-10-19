@@ -1,2 +1,4 @@
 rich
 jsonargparse
+requests
+bs4

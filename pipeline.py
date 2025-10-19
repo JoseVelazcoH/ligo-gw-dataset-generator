@@ -1,6 +1,6 @@
-from core.strategies.loader import LoaderBase
-from core.strategies.transformer import TransformerBase
-from core.strategies.exporter import ExporterBase
+from core.strategies.base.loader import LoaderBase
+from core.strategies.base.transformer import TransformerBase
+from core.strategies.base.exporter import ExporterBase
 from core.utils.logger import Logger
 class Pipeline:
     def __init__(
