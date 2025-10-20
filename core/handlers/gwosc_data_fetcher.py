@@ -2,28 +2,41 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List
 
-from logger import Logger
+from core.utils.logger import Logger
+from core.utils.source_sampling import get_sources_per_sample
 class GWOSCDataFetcher:
-    def match_gwosc_strain_timelines( ) -> List[str]:
-        H1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="H1")
-        L1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="L1")
-        V1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="V1")
+    def match_gwosc_strain_timelines(n_samples: int) -> List[str]:
+        H1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="H1", run="O3b_4KHZ_R1")
+        L1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="L1", run="O3b_4KHZ_R1")
+        V1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="V1", run="O3b_4KHZ_R1")
 
         H1_match_urls = []
         L1_match_urls = []
         V1_match_urls = []
+
+        n_sources = get_sources_per_sample(n_samples=n_samples)
+        n_sources_collected = 0
+
         for timeline in H1_complete_urls:
             if timeline in L1_complete_urls and timeline in V1_complete_urls:
                 H1_match_urls.append(V1_complete_urls[timeline])
                 L1_match_urls.append(L1_complete_urls[timeline])
                 V1_match_urls.append(V1_complete_urls[timeline])
-
-        return H1_match_urls, L1_match_urls, V1_match_urls
+                n_sources_collected += 1
+                if n_sources_collected >= n_sources:
+                    break
+        Logger.info(f"Sources matched collected: {n_sources_collected}")
+        urls = {
+            "H1": H1_match_urls,
+            "L1": L1_match_urls,
+            "V1": V1_match_urls
+        }
+        return urls
 
     @staticmethod
     def _get_gwosc_strain_urls(
-            detector: str = "H1",
-            run: str = "O3b_4KHZ_R1"
+            detector: str,
+            run: str
     ) -> List[str]:
         url = f"https://gwosc.org/archive/links/{run}/{detector}/1256655618/1269363618/simple/"
         Logger.info(f"Fetching GWOSC strain URLs for detector {detector} for run {run}")

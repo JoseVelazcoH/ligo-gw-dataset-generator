@@ -2,3 +2,6 @@ rich
 jsonargparse
 requests
 bs4
+fsspec
+h5py
+aiohttp
