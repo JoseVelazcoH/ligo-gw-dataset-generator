@@ -13,17 +13,7 @@ class WaveformProcessor:
         waveform: List[float],
         frequency: float
     ) -> Tuple[List[float], List[float]]:
-        """
-        Resample the waveform to the desired frequency.
 
-        Args:
-            waveform (List[float]): The original waveform data.
-            time (List[float]): The original time data.
-            frequency (float): The target frequency for resampling.
-
-        Returns:
-            Tuple[List[float], List[float]]: The resampled waveform and time data.
-        """
         try:
 
             time = np.array(time)
@@ -47,16 +37,7 @@ class WaveformProcessor:
         waveform: List[float],
         distance: float
     )-> List[float]:
-        """
-        Rescale the waveform amplitude based on the distance.
 
-        Args:
-            waveform (List[float]): The original waveform data.
-            distance (float): The distance to rescale the amplitude.
-
-        Returns:
-            List[float]: The rescaled waveform data.
-        """
         try:
             rescaled_waveform = constants.default_kpc_distance * (waveform / distance)
             return rescaled_waveform
