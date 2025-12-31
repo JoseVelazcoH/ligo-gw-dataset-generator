@@ -1,1 +1,7 @@
-__pycache/
+__pycache__/
+.venv/
+*.sh
+*.txt
+tests/
+.pytest_cache/
+output/
