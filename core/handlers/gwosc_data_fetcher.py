@@ -9,6 +9,7 @@ class GWOSCDataFetcher:
         H1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="H1", run="O3b_4KHZ_R1")
         L1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="L1", run="O3b_4KHZ_R1")
         V1_complete_urls = GWOSCDataFetcher._get_gwosc_strain_urls(detector="V1", run="O3b_4KHZ_R1")
+        common_timelines = set(H1_complete_urls.keys()) & set(L1_complete_urls.keys()) & set(V1_complete_urls.keys())
 
         H1_match_urls = []
         L1_match_urls = []
@@ -17,14 +18,14 @@ class GWOSCDataFetcher:
         n_sources = get_sources_per_sample(n_samples=n_samples)
         n_sources_collected = 0
 
-        for timeline in H1_complete_urls:
-            if timeline in L1_complete_urls and timeline in V1_complete_urls:
-                H1_match_urls.append(V1_complete_urls[timeline])
-                L1_match_urls.append(L1_complete_urls[timeline])
-                V1_match_urls.append(V1_complete_urls[timeline])
-                n_sources_collected += 1
-                if n_sources_collected >= n_sources:
-                    break
+
+        for timeline in common_timelines:
+            H1_match_urls.append(H1_complete_urls[timeline])
+            L1_match_urls.append(L1_complete_urls[timeline])
+            V1_match_urls.append(V1_complete_urls[timeline])
+            n_sources_collected += 1
+            if n_sources_collected >= n_sources:
+                break
         Logger.info(f"Sources matched collected: {n_sources_collected}")
         urls = {
             "H1": H1_match_urls,
@@ -53,3 +54,59 @@ class GWOSCDataFetcher:
                 link = 'https://gwosc.org' + columns[3].find('a')['href']
                 links[timeline] = link
         return links
+
+
+# def files_from_url(urls_detector: List[str]):
+#     import fsspec
+#     import h5py
+#     import tempfile
+#     import os
+
+#     with tempfile.TemporaryDirectory() as temp_dir:
+#         temp_file = os.path.join(temp_dir, "temp_data.hdf5")
+
+#         Logger.info(f"Downloading file from URL: {urls_detector}")
+#         with fsspec.open(urls_detector, mode="rb") as remote_f:
+#             with open(temp_file, "wb") as local_f:
+#                 local_f.write(remote_f.read())
+
+#         Logger.info(f"Reading local file: {temp_file}")
+#         with h5py.File(temp_file, "r") as File:
+#             strain = File['strain']['Strain'][()]
+#             delta_t = File['strain']['Strain'].attrs['Xspacing']
+#             ts = File['strain']['Strain'].attrs['Xspacing']
+#             meta = File['meta']
+#             gpsStart = meta['GPSstart'][()]
+#             duration = meta['Duration'][()]
+
+#     data = {
+#         "strain": strain,
+#         "gpsStart": gpsStart,
+#         "duration": duration,
+#         "ts": ts,
+#         "delta_t": delta_t
+#     }
+
+#     return data
+
+# if __name__ == "__main__":
+#     urls = GWOSCDataFetcher.match_gwosc_strain_timelines(n_samples=1)
+
+#     # data = files_from_url(urls['H1'][0])
+
+#     # Logger.info(f"Strain shape: {data['strain'].shape}")
+#     # Logger.info(f"GPS Start: {data['gpsStart']}")
+#     # Logger.info(f"Duration: {data['duration']}")
+#     # Logger.info(f"Time Spacing: {data['ts']}")
+#     # Logger.info(f"Delta T: {data['delta_t']}")
+
+    # detectors = ['H1', 'L1', 'V1']
+    # data = dict()
+    # for detector in detectors:
+    #     data[detector] = {}
+    #     for index in range(len(urls[detector])):
+    #         detector_data = files_from_url(urls[detector][index])
+    #         data[detector][index] = detector_data
+
+#     Logger.info(f"Data fetched for detectors: {list(data.keys())}")
+#     Logger.info(f"Strain shape for {detector}: {data[detector]['strain'].shape}")

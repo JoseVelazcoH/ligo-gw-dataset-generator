@@ -3,5 +3,5 @@ from typing import Any
 
 class LoaderBase(ABC):
     @abstractmethod
-    def load(self, source: str, **kwargs) -> Any:
+    def load(self, **kwargs) -> Any:
         pass

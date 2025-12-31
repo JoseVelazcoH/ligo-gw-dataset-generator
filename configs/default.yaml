@@ -1,0 +1,25 @@
+pipeline:
+  loader:
+    class_path: core.strategies.loader.gwoscloader.GWOSCLoader
+    init_args:
+      detectors: [H1]
+      n_samples: 10
+
+  transformer:
+    class_path: core.strategies.transformer.noise_transformer.NoiseTransformer
+    init_args:
+      detector: H1
+      window_size: 2.0
+      whitening_cut: 10
+      whitening_window: 0.5
+      bandpass_fmin: 100.0
+      bandpass_fmax: 1600.0
+      n_samples: 10
+
+  exporter:
+    class_path: core.strategies.exporter.h5_noise_exporter.H5NoiseExporter
+    init_args:
+      compression: gzip
+      compression_opts: 4
+
+destination: "output/h5_noise"
