@@ -8,7 +8,7 @@ from core.utils.preprocessing import Preprocessing
 class NoiseTransformer(TransformerBase):
     def __init__(
         self,
-        detector: str = "H1",
+        detectors: List[str] = None,
         window_size: float = 2.0,
         whitening_cut: int = 10,
         whitening_window: float = 0.5,
@@ -16,7 +16,7 @@ class NoiseTransformer(TransformerBase):
         bandpass_fmax: float = 1600.0,
         n_samples: int = 1
     ):
-        self.detector = detector
+        self.detectors = detectors or ["H1", "L1", "V1"]
         self.window_size = window_size
         self.whitening_cut = whitening_cut
         self.whitening_window = whitening_window
@@ -25,42 +25,51 @@ class NoiseTransformer(TransformerBase):
         self.n_samples = n_samples
 
     def transform(self, data: LoaderData, **kwargs) -> TransformerData:
-        Logger.info(f"Processing noise data for detector {self.detector}")
-
         all_samples = []
-        detector_files = data[self.detector]
 
-        for file_index, file_data in detector_files.items():
-            if file_index >= self.n_samples:
-                break
+        for detector in self.detectors:
+            if detector not in data:
+                Logger.warning(f"Detector {detector} not found in loaded data, skipping")
+                continue
 
-            Logger.info(f"Processing file {file_index + 1}/{len(detector_files)}")
-            strain = file_data["strain"]
-            ts = file_data["time_sampling"]
-            gps_start = file_data["gps_start"]
+            Logger.info(f"Processing noise data for detector {detector}")
+            detector_files = data[detector]
+            detector_samples = []
 
-            strain_copy = np.copy(strain)
+            for file_index, file_data in detector_files.items():
+                if file_index >= self.n_samples:
+                    break
 
-            Logger.info("Applying whitening...")
-            whitened_strain, _, _, _ = Preprocessing.whitening(
-                strain_copy,
-                self.whitening_cut,
-                self.whitening_window,
-                ts
-            )
+                Logger.info(f"Processing file {file_index + 1}/{len(detector_files)}", verbose=False)
+                strain = file_data["strain"]
+                ts = file_data["time_sampling"]
+                gps_start = file_data["gps_start"]
 
-            Logger.info("Applying band-pass filter...")
-            filtered_strain, _ = Preprocessing.bandpass(
-                whitened_strain,
-                self.bandpass_fmin,
-                self.bandpass_fmax,
-                ts
-            )
+                strain_copy = np.copy(strain)
 
-            Logger.info("Creating windowed samples...")
-            file_samples = self._create_windows(filtered_strain, ts, gps_start, file_index)
-            all_samples.extend(file_samples)
-        all_samples = all_samples[:self.n_samples]
+                Logger.info("Starting whitening process", verbose=False)
+                whitened_strain, _, _, _ = Preprocessing.whitening(
+                    strain_copy,
+                    self.whitening_cut,
+                    self.whitening_window,
+                    ts
+                )
+
+                Logger.info("Applying band-pass filter", verbose=False)
+                filtered_strain, _ = Preprocessing.bandpass(
+                    whitened_strain,
+                    self.bandpass_fmin,
+                    self.bandpass_fmax,
+                    ts
+                )
+
+                Logger.info("Creating windowed samples", verbose=False)
+                file_samples = self._create_windows(filtered_strain, ts, gps_start, file_index, detector)
+                detector_samples.extend(file_samples)
+
+            detector_samples = detector_samples[:self.n_samples]
+            all_samples.extend(detector_samples)
+
         Logger.info(f"Generated {len(all_samples)} total windowed samples")
         return all_samples
 
@@ -69,7 +78,8 @@ class NoiseTransformer(TransformerBase):
         s,
         delta_t: float,
         gps_start: float,
-        file_index: int
+        file_index: int,
+        detector: str
     ) -> List[WindowedSample]:
         time_strain_cut = s.sample_times
         sample_points = int(self.window_size / delta_t)
@@ -88,7 +98,7 @@ class NoiseTransformer(TransformerBase):
                 "strain": np.array(s[start:end]),
                 "sample_index": i,
                 "file_index": file_index,
-                "detector": self.detector,
+                "detector": detector,
                 "gps_start": gps_start
             }
             samples.append(sample)

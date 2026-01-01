@@ -2,13 +2,13 @@ pipeline:
   loader:
     class_path: core.strategies.loader.gwoscloader.GWOSCLoader
     init_args:
-      detectors: [H1]
+      detectors: [H1, L1]
       n_samples: 10
 
   transformer:
     class_path: core.strategies.transformer.noise_transformer.NoiseTransformer
     init_args:
-      detector: H1
+      detectors: [H1, L1]
       window_size: 2.0
       whitening_cut: 10
       whitening_window: 0.5
