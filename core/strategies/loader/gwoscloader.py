@@ -36,12 +36,12 @@ class GWOSCLoader(LoaderBase):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file = os.path.join(temp_dir, "temp_data.hdf5")
 
-            Logger.info(f"Downloading file from URL: {url}")
+            Logger.info(f"Downloading file from URL: {url}", verbose=False)
             with fsspec.open(url, mode="rb") as remote_f:
                 with open(temp_file, "wb") as local_f:
                     local_f.write(remote_f.read())
 
-            Logger.info(f"Reading temp file: {temp_file}")
+            Logger.info(f"Reading temp file: {temp_file}", verbose=False)
             with h5py.File(temp_file, "r") as file:
                 strain = file['strain']['Strain'][()]
                 delta_t = file['strain']['Strain'].attrs['Xspacing']

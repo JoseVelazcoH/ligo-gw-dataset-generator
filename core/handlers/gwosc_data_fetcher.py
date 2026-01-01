@@ -25,7 +25,7 @@ class GWOSCDataFetcher:
             n_sources_collected += 1
             if n_sources_collected >= n_sources:
                 break
-        Logger.info(f"Sources matched collected: {n_sources_collected}")
+        Logger.info(f"Sources matched collected: {n_sources_collected}", verbose=False)
         urls = {
             "H1": H1_match_urls,
             "L1": L1_match_urls,

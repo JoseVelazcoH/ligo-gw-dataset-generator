@@ -76,8 +76,8 @@ class H5NoiseExporter(ExporterBase):
                 f.attrs[key] = value
 
         Logger.info(f"Dataset saved to: {output_file}")
-        Logger.info(f"Shape: {strains.shape}")
-        Logger.info(f"Size: {os.path.getsize(output_file) / 1024 / 1024:.2f} MB")
+        Logger.info(f"Shape: {strains.shape}", verbose=False)
+        Logger.info(f"Size: {os.path.getsize(output_file) / 1024 / 1024:.2f} MB", verbose=False)
 
     def _extract_metadata(self, data: TransformerData) -> Dict[str, Any]:
         if not data:
