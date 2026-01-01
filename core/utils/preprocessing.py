@@ -15,14 +15,13 @@ class Preprocessing():
             whitening_window: float,
             delta_t: List
         ):
-        Logger.info("Converting strain data to TimeSeries for whitening.")
+        Logger.info("Converting strain data to TimeSeries for whitening.", verbose=False)
         strain_timeseries = TimeSeries(strain_data, delta_t)
-        Logger.info("Starting whitening process.")
         whitened_strain, _ = strain_timeseries.whiten(whitening_window, lowpass_cutoff, return_psd=True)
 
         segment_length = int(4/delta_t)
         segment_stride = int(2/delta_t)
-        Logger.info("Calculating PSD.")
+        Logger.info("Calculating PSD.", verbose=False)
         psd = psd_welch(strain_timeseries, seg_len=segment_length, seg_stride=segment_stride)
         psd_sqrt = psd**0.5
         scaling_factor = min(psd_sqrt)
@@ -50,23 +49,3 @@ class Preprocessing():
         psd_filtered = psd_welch(strain_filtered, segment_length, segment_stride)
 
         return (strain_filtered, psd_filtered)
-
-
-    #     @staticmethod
-    #     def preprocessing()
-
-    # if __name__ == "__main__":
-    #     from core.strategies.loader.gwoscloader import GWOSCLoader
-
-    #     strain_noise_new = GWOSCLoader().load()['H1'][0]['strain']
-
-
-    #     ts = 1/4096  # Example time spacing
-    #     Sw, Swpsd, psd, fpsd = whitening(strain_noise_new, 10, 0.5, ts)
-
-    #     Sf, Sfpsd = bandpass(Sw, 100, 1600, ts)
-
-    #     print("Whitened Strain:", Sw)
-    #     print("Whitened Scaled PSD:", Swpsd) # solo se usa para hacer el plot
-    #     print("Bandpassed Strain:", Sf) # solo se usa para hacer el plot
-    #     print("Bandpassed PSD:", Sfpsd)
