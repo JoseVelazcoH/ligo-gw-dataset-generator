@@ -5,3 +5,7 @@ __pycache__/
 tests/
 .pytest_cache/
 output/
+*.png
+*.jpg
+debug/
+models/

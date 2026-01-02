@@ -1,0 +1,30 @@
+pipeline:
+  loader:
+    class_path: core.strategies.loader.injection_loader.InjectionLoader
+    init_args:
+      waveform_path: "models/S15.0_GW_Nu.h5"
+      detectors: [H1]
+      n_samples: 1
+
+  transformer:
+    class_path: core.strategies.transformer.injection_transformer.InjectionTransformer
+    init_args:
+      distances: [5, 10, 20]
+      detectors: [H1]
+      injection_interval_seconds: 2.0
+      window_size: 1.0
+      whitening_cut: 10
+      whitening_window: 0.5
+      bandpass_fmin: 100.0
+      bandpass_fmax: 1600.0
+      n_samples: 10
+      polarization: "h_plus"
+
+  exporter:
+    class_path: core.strategies.exporter.h5_injection_exporter.H5InjectionExporter
+    init_args:
+      compression: gzip
+      compression_opts: 4
+      file_name_template: "injection_dataset_{distance}kpc"
+
+destination: "output/h5_injections"
