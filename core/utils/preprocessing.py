@@ -1,4 +1,3 @@
-
 from pycbc.types.timeseries import TimeSeries
 from pycbc.psd import welch as psd_welch
 from pycbc.filter import highpass, lowpass_fir
@@ -10,21 +9,22 @@ class Preprocessing():
 
     @staticmethod
     def whitening(
-            strain_data:List[float],
+            strain:List[float],
             lowpass_cutoff: int,
             whitening_window: float,
-            delta_t: List
+            delta_t: float
         ):
         Logger.info("Converting strain data to TimeSeries for whitening.", verbose=False)
-        strain_timeseries = TimeSeries(strain_data, delta_t)
-        whitened_strain, _ = strain_timeseries.whiten(whitening_window, lowpass_cutoff, return_psd=True)
+        strain_timeseries = TimeSeries(strain, delta_t)
+        # whitened_strain, _ = strain_timeseries.whiten(whitening_window, lowpass_cutoff, return_psd=True)
+        whitened_strain = strain_timeseries.whiten(whitening_window, lowpass_cutoff)
 
         segment_length = int(4/delta_t)
         segment_stride = int(2/delta_t)
         Logger.info("Calculating PSD.", verbose=False)
         psd = psd_welch(strain_timeseries, seg_len=segment_length, seg_stride=segment_stride)
-        psd_sqrt = psd**0.5
-        scaling_factor = min(psd_sqrt)
+        asd = psd**0.5
+        scaling_factor = min(asd)
         whitened_scaled = whitened_strain * scaling_factor
 
         psd_whitened_scaled = psd_welch(whitened_scaled, seg_len=segment_length, seg_stride=segment_stride)
@@ -34,7 +34,7 @@ class Preprocessing():
 
     @staticmethod
     def bandpass(
-        strain: List[float],
+        strain: TimeSeries,
         lowcut: int,
         highcut: int,
         delta_t: list,
