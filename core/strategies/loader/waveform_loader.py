@@ -1,14 +1,14 @@
 import h5py
 import numpy as np
 from typing import Dict, Any
+from dataclasses import dataclass
 
 from core.strategies.base.loader import LoaderBase
 from core.utils.logger import Logger
 
-
+@dataclass
 class WaveformLoader(LoaderBase):
-    def __init__(self, waveform_path: str):
-        self.waveform_path = waveform_path
+    waveform_path: str
 
     def load(self, **kwargs) -> Dict[str, Any]:
         Logger.info(f"Loading waveform from {self.waveform_path}")

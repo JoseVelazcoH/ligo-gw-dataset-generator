@@ -1,25 +1,20 @@
 import os
 import h5py
 import numpy as np
+from dataclasses import dataclass
 from typing import Dict, Any
+
 from core.strategies.base.exporter import ExporterBase
 from core.types import InjectionTransformerData
 from core.utils.logger import Logger
 
-
+@dataclass
 class H5InjectionExporter(ExporterBase):
-    def __init__(
-        self,
-        compression: str = "gzip",
-        compression_opts: int = 4,
-        file_name_template: str = "injection_dataset_{distance}kpc"
-    ):
-        self.compression = compression
-        self.compression_opts = compression_opts
-        self.file_name_template = file_name_template
+    compression:str = "gzip"
+    compression_opts: int = 4
+    file_name_template: str= "gw_strain_{distance}_kpc"
 
     def export(self, data: InjectionTransformerData, destination: str, **kwargs) -> None:
-
         os.makedirs(destination, exist_ok=True)
 
         for distance, samples in data.items():
@@ -27,7 +22,7 @@ class H5InjectionExporter(ExporterBase):
                 Logger.warning(f"No samples for distance {distance} kpc, skipping")
                 continue
 
-            Logger.info(f"Exporting {len(samples)} samples at {distance} kpc to HDF5...")
+            Logger.info(f"Exporting {len(samples)} samples at {distance} kpc to HDF5.")
 
             file_name = self.file_name_template.format(distance=distance)
             output_file = os.path.join(destination, f"{file_name}.h5")

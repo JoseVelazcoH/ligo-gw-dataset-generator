@@ -16,7 +16,6 @@ class Preprocessing():
         ):
         Logger.info("Converting strain data to TimeSeries for whitening.", verbose=False)
         strain_timeseries = TimeSeries(strain, delta_t)
-        # whitened_strain, _ = strain_timeseries.whiten(whitening_window, lowpass_cutoff, return_psd=True)
         whitened_strain = strain_timeseries.whiten(whitening_window, lowpass_cutoff)
 
         segment_length = int(4/delta_t)

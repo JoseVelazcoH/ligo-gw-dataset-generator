@@ -2,31 +2,22 @@ import os
 import h5py
 import numpy as np
 from typing import Dict, Any
+from dataclasses import dataclass
+
 from core.strategies.base.exporter import ExporterBase
 from core.types import TransformerData
 from core.utils.logger import Logger
 
+@dataclass
 class H5NoiseExporter(ExporterBase):
-    def __init__(
-        self,
-        # base_dir: str = "output",
-        compression: str = "gzip",
-        compression_opts: int = 4,
-        file_name: str = "noise_dataset"
-    ):
-        # self.base_dir = base_dir
-        self.compression = compression
-        self.compression_opts = compression_opts
-        self.file_name = file_name
+    compression:str = "gzip"
+    compression_opts: int = 4
+    file_name: str= "strain_noise"
 
     def export(self, data: TransformerData, destination: str, **kwargs) -> None:
-        Logger.info(f"Exporting {len(data)} samples to HDF5...")
-
+        Logger.info(f"Exporting {len(data)} samples to HDF5")
         os.makedirs(destination, exist_ok=True)
-
-        # output_file = os.path.join(self.base_dir, f"{destination}.h5")
         output_file = os.path.join(destination, f"{self.file_name}.h5")
-
 
         times = np.stack([s['time'] for s in data])
         strains = np.stack([s['strain'] for s in data])

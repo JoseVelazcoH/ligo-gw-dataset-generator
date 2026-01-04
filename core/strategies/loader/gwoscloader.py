@@ -1,21 +1,19 @@
-from typing import Dict, List
 import fsspec
 import h5py
 import tempfile
 import os
+from dataclasses import dataclass
+from typing import Dict, List
 
 from core.strategies.base.loader import LoaderBase
 from core.handlers.gwosc_data_fetcher import GWOSCDataFetcher
 from core.utils.logger import Logger
 from core.types.custom_types import LoaderData
+
+@dataclass
 class GWOSCLoader(LoaderBase):
-    def __init__(
-        self,
-        detectors: List[str] = None,
-        n_samples: int = 1_000
-    ):
-        self.detectors = detectors or ["H1", "L1", "V1"]
-        self.n_samples = n_samples
+    detectors: List[str] = None
+    n_samples: List[str] = 1
 
     def load(self, **kwargs) -> LoaderData:
         urls = GWOSCDataFetcher.match_gwosc_strain_timelines(

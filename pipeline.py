@@ -1,19 +1,16 @@
+import time
+from dataclasses import dataclass
+
 from core.strategies.base.loader import LoaderBase
 from core.strategies.base.transformer import TransformerBase
 from core.strategies.base.exporter import ExporterBase
 from core.utils.logger import Logger
-import time
 
+@dataclass
 class Pipeline:
-    def __init__(
-        self,
-        loader: LoaderBase,
-        transformer: TransformerBase,
-        exporter: ExporterBase
-    ):
-        self.loader = loader
-        self.transformer = transformer
-        self.exporter = exporter
+    loader: LoaderBase
+    transformer: TransformerBase
+    exporter: ExporterBase
 
     def execute(self, destination: str):
         start_time = time.time()
