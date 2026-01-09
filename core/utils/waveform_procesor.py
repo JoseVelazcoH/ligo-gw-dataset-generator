@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 from typing import Tuple, List
 
-import constants.gw_constants as constants
+import core.constants.gw_constants as constants
 from core.utils.logger import Logger
 
 class WaveformProcessor:
