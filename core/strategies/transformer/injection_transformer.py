@@ -1,12 +1,12 @@
-from typing import List, Dict
 import numpy as np
+from typing import List, Dict
 from dataclasses import dataclass
 
 from core.strategies.base.transformer import TransformerBase
 from core.types import InjectionLoaderData, InjectionTransformerData, InjectionWindowedSample
 from core.utils.logger import Logger
-from core.utils.preprocessing import Preprocessing
-from core.utils.waveform_procesor import WaveformProcessor
+from core.utils.preprocessing import whitening, bandpass
+from core.utils.waveform_procesor import resample_waveform, rescale_waveform_amplitude, waveform_to_dimensionless
 from core.injections.waveform_injector import WaveformInjector
 
 @dataclass
@@ -38,14 +38,14 @@ class InjectionTransformer(TransformerBase):
             )
 
         Logger.info("Converting waveform to dimensionless")
-        waveform_dimensionless = WaveformProcessor.waveform_to_dimensionless(waveform_raw)
+        waveform_dimensionless = waveform_to_dimensionless(waveform_raw)
 
         all_samples_by_distance: InjectionTransformerData = {distance: [] for distance in self.distances}
 
         for distance in self.distances:
             Logger.info(f"Processing injections at distance: {distance} kpc")
 
-            waveform_rescaled = WaveformProcessor.rescale_waveform_amplitude(
+            waveform_rescaled = rescale_waveform_amplitude(
                 waveform_dimensionless,
                 distance
             )
@@ -85,7 +85,7 @@ class InjectionTransformer(TransformerBase):
                             f"will only generate {n_injections_possible} samples per file"
                         )
 
-                    time_wf_resampled, waveform_resampled = WaveformProcessor.resample_waveform(
+                    time_wf_resampled, waveform_resampled = resample_waveform(
                         time_wf,
                         waveform_rescaled,
                         sampling_frequency
@@ -107,7 +107,7 @@ class InjectionTransformer(TransformerBase):
                     )
 
                     Logger.info("Applying whitening", verbose=False)
-                    whitened_strain, _, _, _ = Preprocessing.whitening(
+                    whitened_strain, _, _, _ = whitening(
                         strain_with_injections,
                         self.whitening_cut,
                         self.whitening_window,
@@ -115,7 +115,7 @@ class InjectionTransformer(TransformerBase):
                     )
 
                     Logger.info("Applying band-pass filter", verbose=False)
-                    filtered_strain, _ = Preprocessing.bandpass(
+                    filtered_strain, _ = bandpass(
                         whitened_strain,
                         self.bandpass_fmin,
                         self.bandpass_fmax,

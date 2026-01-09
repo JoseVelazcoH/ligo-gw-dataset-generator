@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from core.strategies.base.transformer import TransformerBase
 from core.types import LoaderData, TransformerData, WindowedSample
 from core.utils.logger import Logger
-from core.utils.preprocessing import Preprocessing
+from core.utils.preprocessing import whitening, bandpass
 
 @dataclass
 class NoiseTransformer(TransformerBase):
@@ -42,7 +42,7 @@ class NoiseTransformer(TransformerBase):
                 strain_copy = np.copy(strain)
 
                 Logger.info("Starting whitening process", verbose=False)
-                whitened_strain, _, _, _ = Preprocessing.whitening(
+                whitened_strain, _, _, _ = whitening(
                     strain_copy,
                     self.whitening_cut,
                     self.whitening_window,
@@ -50,7 +50,7 @@ class NoiseTransformer(TransformerBase):
                 )
 
                 Logger.info("Applying band-pass filter", verbose=False)
-                filtered_strain, _ = Preprocessing.bandpass(
+                filtered_strain, _ = bandpass(
                     whitened_strain,
                     self.bandpass_fmin,
                     self.bandpass_fmax,
