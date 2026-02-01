@@ -2,10 +2,11 @@ __pycache__/
 .venv/
 *.sh
 *.txt
-tests/
+tmp/
 .pytest_cache/
 output/
 *.png
 *.jpg
 debug/
-models/
+models/*
+!models/.gitkeep
